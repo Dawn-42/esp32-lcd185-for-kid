@@ -1,0 +1,7 @@
+Default script uses separate images and leaves NVS 0x9000..0xDFFF untouched.
+Use flash-windows.cmd; the merged YouyouSpace.bin is a full-reset image.
+
+0x000000 YouyouSpace.bootloader.bin (20208 bytes)
+0x008000 YouyouSpace.partitions.bin (3072 bytes)
+0x010000 YouyouSpace.app.bin (2703968 bytes)
+0x00e000 boot_app0.bin (8192 bytes)

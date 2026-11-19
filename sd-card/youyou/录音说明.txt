@@ -1,0 +1,18 @@
+把录音放在此目录，然后将整个 youyou 文件夹复制到 SD 卡根目录。
+
+hello.wav：开机问候。
+meow.wav：短猫叫。
+birthday.wav：生日祝福。
+
+格式：WAV / PCM 16-bit / mono / 16000 Hz。
+没有录音时也能玩，使用内置提示音和生日旋律。
+
+
+第八版可选操作提示（同样为PCM16、单声道、16000Hz WAV）：
+feed.wav：点小鱼，喂小A吃一口。
+bath.wav：点泡泡，给小A洗香香。
+play.wav：点小球，陪小A一起玩。
+litter.wav：点便便，帮小A清理小窝。
+sleep.wav：小A要睡觉啦，轻轻点它可以叫醒。
+把这些文件放在SD卡 /youyou/ 下。缺少文件时使用短提示音，不会自动生成中文语音。
+hello.wav 与 birthday.wav 仍使用家人自己的开机问候和生日祝福录音。

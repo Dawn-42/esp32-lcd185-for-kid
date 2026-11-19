@@ -1,0 +1,54 @@
+第八版性能与存档验证
+
+固定工作负载：默认种子20261123，月亮任务，240帧，步长33ms，周期倾斜输入。
+LVGL8.4.0、RGB565、360×360、360×36部分帧缓冲；跳过入场淡入。
+BENCH drive frames=240 avg_changed_pixels=34323 avg_actual_flush_pixels=44090 full_frame_ratio=0.340 host_frame_us=1603 static_rebuilds=3
+相对整屏每帧129600像素，传输区域平均减少 65.98%。
+电脑耗时不代表ESP32实测帧率或功耗。
+
+养宠模型：固定容量状态，无逐帧动态分配；状态按开机时间推进，关机不补算。
+字体：23px界面文字和16px状态/工具文字，均为预生成子集。
+素材：62张预处理RGB565+A8数组；链接器删除未引用的旧姿态，无运行时PNG解码。
+渲染缓存：3×360×360×2字节PSRAM，沿用静态缓存/变化块/独立音频任务。
+存档：版本化96字节小记录，校验与A/B交替，合并写请求，普通存档间隔至少5秒，
+退出照顾任务时可立即提交；没有实际状态变化的满心情摸摸等不触发持久写入。
+默认升级使用分段镜像，准备脚本已校验NVS所在扇区不被写入或擦除。
+
+实际硬件的音频任务栈、帧率、断电和升级行为仍需实板确认。
+串口115200每10秒输出PERF：合成次数、合成/差分耗时、变化区域像素、堆和PSRAM。
+
+像素深圳：180×180逻辑像素放大2倍，复用原有RGB565画布；新增状态两个32位字段。
+固定车距与整数周期轨迹，无新增纹理、帧缓冲或逐帧动态分配。
+目标绘图间隔50ms；50Hz逻辑调度可能把实际间隔量化到60ms，硬件仍需实测。
+24秒480帧完整周期，六次地标静态缓存更新。窗口亮灯固定，云、波纹与车流按周期运动。
+PASS: identical frame requests zero changed pixels and zero display transfers
+PASS: incremental frames equal full recomposition; actual LVGL partial flushes reconstruct every frame
+BENCH drive frames=240 avg_changed_pixels=34323 avg_actual_flush_pixels=44090 full_frame_ratio=0.340 host_frame_us=1603 static_rebuilds=3
+BENCH city frames=480 avg_changed_pixels=45410 avg_actual_flush_pixels=50988 full_frame_ratio=0.393 host_frame_us=1227 static_rebuilds=6
+城市平均实际传输50988/129600像素，较整屏减少约60.7%。
+缓存与完整绘图逐像素比对覆盖循环衔接；全480帧检查相隔24秒的画面一致。
+
+配色更新：明亮糖果色晴空、笑脸太阳、薄荷和浅紫建筑；所有周期与刷新测试再次通过。
+
+像素房间：180×180整数像素背景，窗口云朵、绿植与阳光动态；静态家具缓存。
+PetWalk为固定大小临时字段，仅小猫页面的Room/Play活动推进，不改变96字节NVS格式。
+小窝和追球目标刷新间隔60ms；喂鱼/洗澡/铲屎保持定位，睡眠100ms。
+480帧小窝散步基准、60ms步长（28.8秒），无静态UI变化：
+BENCH room frames=480 avg_changed_pixels=8214 avg_actual_flush_pixels=10641 full_frame_ratio=0.082 host_frame_us=1165 static_rebuilds=0
+平均实际传输10641像素/帧，相比整屏减少约91.8%；电脑耗时不代表实板帧率。
+六组本地测试通过；100000步走动边界/速度、触摸跟随、呼唤、隐藏暂停、存档等价。
+走动测试通过AddressSanitizer与UndefinedBehaviorSanitizer（detect_leaks=0）。
+
+步态：右向八帧、左向八帧、三个转身角度和两个站立姿态，统一128×104画布与脚底基准。
+新增21张RGB565+A8素材共838656字节Flash；镜像在打包阶段完成，无运行时PNG解码。
+按实际移动距离累计phase；起步先站立，再以85px/s²加速，接近目标时制动。
+反向移动前先停止并经过240ms转向，休息时步态相位不推进。
+存档仍为96字节，不保存速度、朝向、步态与位置；不因走路增加NVS写入。
+六组测试及Address/Undefined sanitizers通过，覆盖八帧推进、距离/相位关系、加速上限与静止转向。
+
+儿童交互：需要图标、原位反馈、成长小花与七种房间纪念物均复用现有素材或代码绘制。
+未新增图片图集或帧缓冲；小窝动态区恢复扩到65行起，覆盖顶部图标脉冲，防止累积残影。
+纪念物组合纳入静态背景缓存键；记录扩展completedMask的保留位，仍为96字节。
+六组本地测试通过，含新旧存档、背景点按不推进任务、需要图标、呼唤到达回应、城市小车防重入。
+ASan/UBSan：儿童交互测试通过（detect_leaks=0）。
+实际触摸、音量、硬件帧率和断电保存仍待实板验证。

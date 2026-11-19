@@ -1,0 +1,12 @@
+build/
+.cache/
+*.ppm
+__pycache__/
+.build*/
+preview-frames/
+*.part
+
+# Environment-managed directories are not project files.
+/.agents/
+/.aws/
+/.codex/
